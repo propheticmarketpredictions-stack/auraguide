@@ -9,6 +9,7 @@ import FilterBar from "../components/guide/FilterBar";
 import ChannelCard from "../components/guide/ChannelCard";
 import LoadingSkeleton from "../components/guide/LoadingSkeleton";
 import SchedulePicker from "../components/guide/SchedulePicker";
+import DonationBanner from "../components/guide/DonationBanner";
 
 const STORAGE_KEY = "channel_guide_profile";
 
@@ -301,6 +302,9 @@ Include live TV, streaming, and on-demand options. For each entry: rank (1-25), 
             </div>
           )}
         </div>
+
+        {/* Donation */}
+        <DonationBanner />
 
         {/* Footer */}
         <footer className="text-center py-8 border-t border-border">
