@@ -213,7 +213,7 @@ Include live TV, streaming, and on-demand options. rank (1-25), channel_name, cu
         ) : activeChannels.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {activeChannels.map((channel, i) => (
-              <ChannelCard key={`${activeService}-${channel.rank}-${channel.channel_name}`} channel={channel} index={i} />
+              <ChannelCard key={`${activeService}-${channel.rank}-${channel.channel_name}`} channel={channel} index={i} serviceId={activeService} />
             ))}
           </div>
         ) : (

@@ -1,7 +1,19 @@
 import React from "react";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Star, Radio, Play, Tv } from "lucide-react";
+import { Clock, Star, Radio, Play, Tv, ExternalLink } from "lucide-react";
 import { motion } from "framer-motion";
+
+const SERVICE_SEARCH_URLS = {
+  netflix: (title) => `https://www.netflix.com/search?q=${encodeURIComponent(title)}`,
+  hulu: (title) => `https://www.hulu.com/search?q=${encodeURIComponent(title)}`,
+  max: (title) => `https://www.max.com/search?q=${encodeURIComponent(title)}`,
+  amazon: (title) => `https://www.amazon.com/s?k=${encodeURIComponent(title)}&i=instant-video`,
+  appletv: (title) => `https://tv.apple.com/search?term=${encodeURIComponent(title)}`,
+  peacock: (title) => `https://www.peacocktv.com/search?q=${encodeURIComponent(title)}`,
+  paramount: (title) => `https://www.paramountplus.com/search/?q=${encodeURIComponent(title)}`,
+  disney: (title) => `https://www.disneyplus.com/search/${encodeURIComponent(title)}`,
+  livetv: (title) => `https://www.google.com/search?q=${encodeURIComponent(title + " watch live")}`,
+};
 
 const typeColors = {
   live: "bg-red-500/20 text-red-400 border-red-500/30",
@@ -28,7 +40,7 @@ const genreColors = {
   "Sci-Fi": "from-cyan-600/30 to-cyan-900/30",
 };
 
-export default function ChannelCard({ channel, index }) {
+export default function ChannelCard({ channel, index, serviceId }) {
   const TypeIcon = typeIcons[channel.type] || Tv;
   const gradientClass = genreColors[channel.genre] || "from-secondary to-muted";
 
@@ -88,13 +100,28 @@ export default function ChannelCard({ channel, index }) {
           </p>
         )}
 
-        {/* Rating */}
-        {channel.rating && (
-          <div className="flex items-center gap-1 mt-3">
-            <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-            <span className="text-[11px] text-muted-foreground font-body">{channel.rating}</span>
-          </div>
-        )}
+        {/* Rating + Watch Now */}
+        <div className="flex items-center justify-between mt-3">
+          {channel.rating ? (
+            <div className="flex items-center gap-1">
+              <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+              <span className="text-[11px] text-muted-foreground font-body">{channel.rating}</span>
+            </div>
+          ) : <div />}
+
+          {serviceId && SERVICE_SEARCH_URLS[serviceId] && (
+            <a
+              href={SERVICE_SEARCH_URLS[serviceId](channel.channel_name)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 px-2 py-1 rounded-lg bg-primary/20 hover:bg-primary/40 text-primary text-[10px] font-heading font-semibold transition-colors"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ExternalLink className="w-2.5 h-2.5" />
+              Watch
+            </a>
+          )}
+        </div>
       </div>
     </motion.div>
   );
