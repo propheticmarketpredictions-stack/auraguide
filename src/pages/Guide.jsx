@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { format } from "date-fns";
-import { Tv, AlertCircle } from "lucide-react";
+import { format, startOfDay } from "date-fns";
+import { Tv, AlertCircle, CalendarDays, Loader2 } from "lucide-react";
 
 import OnboardingModal from "../components/guide/OnboardingModal";
 import Header from "../components/guide/Header";
 import FilterBar from "../components/guide/FilterBar";
 import ChannelCard from "../components/guide/ChannelCard";
 import LoadingSkeleton from "../components/guide/LoadingSkeleton";
+import SchedulePicker from "../components/guide/SchedulePicker";
 
 const STORAGE_KEY = "channel_guide_profile";
 
@@ -66,6 +67,10 @@ export default function Guide() {
   const [error, setError] = useState(null);
   const [count, setCount] = useState(10);
   const [mediaType, setMediaType] = useState("all");
+  const [scheduleDate, setScheduleDate] = useState(startOfDay(new Date()));
+  const [scheduleHour, setScheduleHour] = useState(new Date().getHours());
+  const [scheduleChannels, setScheduleChannels] = useState([]);
+  const [scheduleLoading, setScheduleLoading] = useState(false);
 
   const fetchRecommendations = useCallback(async (overrideCount, overrideType) => {
     setIsLoading(true);
@@ -135,6 +140,58 @@ export default function Guide() {
 
   const filteredChannels = channels;
 
+  const fetchSchedule = useCallback(async (date, hour) => {
+    setScheduleLoading(true);
+    const useDate = date || scheduleDate;
+    const useHour = hour !== undefined ? hour : scheduleHour;
+    const h = useHour % 12 || 12;
+    const ampm = useHour < 12 ? "AM" : "PM";
+    const timeLabel = `${h}:00 ${ampm}`;
+    const dateLabel = format(useDate, "EEEE, MMMM d, yyyy");
+
+    const prompt = `You are an expert TV and media guide. Generate the top 25 channel/content picks for ${timeLabel} on ${dateLabel}.
+Include live TV, streaming, and on-demand options. For each entry: rank (1-25), channel_name, current_show, type ("live"/"streaming"/"on-demand"), genre (News/Sports/Movies/Comedy/Drama/Kids/Documentary/Music/Reality/Sci-Fi), description (max 12 words), rating (e.g. "8/10"). Keep it concise.`;
+
+    const result = await base44.integrations.Core.InvokeLLM({
+      prompt,
+      add_context_from_internet: true,
+      model: "gemini_3_flash",
+      response_json_schema: {
+        type: "object",
+        properties: {
+          channels: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                rank: { type: "number" },
+                channel_name: { type: "string" },
+                current_show: { type: "string" },
+                type: { type: "string" },
+                genre: { type: "string" },
+                description: { type: "string" },
+                rating: { type: "string" },
+              },
+              required: ["rank", "channel_name", "current_show", "type", "genre"],
+            },
+          },
+        },
+      },
+    });
+    setScheduleChannels(result.channels || []);
+    setScheduleLoading(false);
+  }, [scheduleDate, scheduleHour]);
+
+  const handleScheduleDateChange = (date) => {
+    setScheduleDate(date);
+    setScheduleChannels([]);
+  };
+
+  const handleScheduleHourChange = (hour) => {
+    setScheduleHour(hour);
+    fetchSchedule(scheduleDate, hour);
+  };
+
   return (
     <div className="min-h-screen bg-background font-body">
       <OnboardingModal
@@ -199,6 +256,51 @@ export default function Guide() {
             <p className="text-muted-foreground text-sm mt-1">Click Refresh to get your personalized recommendations</p>
           </div>
         )}
+
+        {/* Schedule Section */}
+        <div className="space-y-5">
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-border" />
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary border border-border">
+              <CalendarDays className="w-3.5 h-3.5 text-primary" />
+              <span className="text-xs font-heading font-semibold text-foreground">Future Schedule</span>
+            </div>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+
+          <SchedulePicker
+            selectedDate={scheduleDate}
+            selectedHour={scheduleHour}
+            onDateChange={handleScheduleDateChange}
+            onHourChange={handleScheduleHourChange}
+          />
+
+          {scheduleLoading && (
+            <div className="flex items-center justify-center py-12 gap-3 text-muted-foreground">
+              <Loader2 className="w-5 h-5 animate-spin text-primary" />
+              <span className="text-sm font-body">Loading schedule for {format(scheduleDate, "MMM d")} at {scheduleHour % 12 || 12}{scheduleHour < 12 ? "am" : "pm"}...</span>
+            </div>
+          )}
+
+          {!scheduleLoading && scheduleChannels.length > 0 && (
+            <div className="space-y-3">
+              <p className="text-xs text-muted-foreground font-body">
+                Top 25 picks for <span className="text-foreground font-medium">{format(scheduleDate, "EEEE, MMM d")}</span> at <span className="text-foreground font-medium">{scheduleHour % 12 || 12}:00 {scheduleHour < 12 ? "AM" : "PM"}</span>
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                {scheduleChannels.map((channel, i) => (
+                  <ChannelCard key={`sched-${channel.rank}-${channel.channel_name}`} channel={channel} index={i} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {!scheduleLoading && scheduleChannels.length === 0 && (
+            <div className="text-center py-10 text-muted-foreground text-sm font-body">
+              Select a time slot above to load schedule picks.
+            </div>
+          )}
+        </div>
 
         {/* Footer */}
         <footer className="text-center py-8 border-t border-border">
