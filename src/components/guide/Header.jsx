@@ -19,7 +19,7 @@ export default function Header({ profile, onEditProfile }) {
             </div>
             <div>
               <h1 className="font-heading font-bold text-lg text-foreground tracking-tight">
-                Channel Guide
+                Murmur
               </h1>
               <p className="text-[11px] text-muted-foreground font-body">
                 {dateStr} · {timeStr}

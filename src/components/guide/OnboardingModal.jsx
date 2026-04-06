@@ -64,9 +64,9 @@ export default function OnboardingModal({ open, onComplete }) {
                     <Tv className="w-10 h-10 text-primary" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-heading font-bold">Welcome to Channel Guide</h2>
+                    <h2 className="text-2xl font-heading font-bold">Welcome to Murmur</h2>
                     <p className="text-muted-foreground mt-2 font-body text-sm">
-                      Your personal AI-powered TV & streaming assistant. Let's personalize your experience.
+                      Your personal AI-powered TV & streaming guide. Always on, always running. Let's personalize your experience.
                     </p>
                   </div>
                 </div>

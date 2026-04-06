@@ -179,7 +179,7 @@ Include live TV, streaming, and on-demand options. rank (1-25), channel_name, cu
               {profile?.name ? `${profile.name}'s Guide` : "What's On Now"}
             </h2>
             <p className="text-muted-foreground font-body text-sm mt-2 max-w-xl">
-              AI-curated top 25 picks per streaming service — updated in real-time.
+              AI-curated top 25 picks per streaming service, always running in the background.
               {profile?.location && ` Tuned for ${profile.location}.`}
             </p>
           </div>
