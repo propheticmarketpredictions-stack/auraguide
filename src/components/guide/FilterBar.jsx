@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Radio, Play, Tv, LayoutGrid, Sparkles } from "lucide-react";
 
-const countOptions = [25, 50, 100];
+const countOptions = [10, 15, 25];
 const mediaTypes = [
   { value: "all", label: "All", icon: LayoutGrid },
   { value: "live", label: "Live TV", icon: Radio },

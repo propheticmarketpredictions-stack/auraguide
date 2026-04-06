@@ -53,16 +53,7 @@ Generate a list of exactly ${count} channel/media recommendations that are curre
     prompt += ` They are located in ${profile.location}, so include local channels and regional content available in that area.`;
   }
 
-  prompt += `\n\nFor each recommendation include:
-- rank (1 to ${count})
-- channel_name: the channel or platform name
-- current_show: what's currently playing or the recommended title
-- type: "live", "streaming", or "on-demand"
-- genre: one of "News", "Sports", "Movies", "Comedy", "Drama", "Kids", "Documentary", "Music", "Reality", "Sci-Fi"
-- description: brief 1-sentence description of why they should watch this now
-- rating: a quality rating out of 10 (e.g. "8.5/10")
-
-Make the recommendations feel current, timely, and personalized. Consider what typically airs at this time of day and day of the week. Include popular, trending, and hidden gem picks.`;
+  prompt += `\n\nFor each entry provide: rank (1-${count}), channel_name, current_show, type ("live"/"streaming"/"on-demand"), genre (News/Sports/Movies/Comedy/Drama/Kids/Documentary/Music/Reality/Sci-Fi), description (one short sentence), rating (e.g. "8.5/10"). Keep descriptions under 15 words.`;
 
   return prompt;
 }
@@ -73,7 +64,7 @@ export default function Guide() {
   const [channels, setChannels] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [count, setCount] = useState(25);
+  const [count, setCount] = useState(10);
   const [mediaType, setMediaType] = useState("all");
 
   const fetchRecommendations = useCallback(async (overrideCount, overrideType) => {
@@ -105,6 +96,7 @@ export default function Guide() {
                 description: { type: "string" },
                 rating: { type: "string" },
               },
+              required: ["rank", "channel_name", "current_show", "type", "genre"],
             },
           },
         },
