@@ -28,6 +28,7 @@ const SERVICE_PROMPTS = {
   peacock: "Peacock",
   paramount: "Paramount+",
   disney: "Disney+",
+  pluto: "Pluto TV (free ad-supported streaming with live channels and on-demand movies/shows)",
   livetv: "Live TV (cable and broadcast channels like NBC, CBS, ABC, Fox, ESPN, CNN, etc.)",
 };
 
@@ -38,9 +39,11 @@ function buildServicePrompt(serviceId, profile) {
   const serviceName = SERVICE_PROMPTS[serviceId];
 
   let prompt = `You are an expert streaming guide. It is currently ${currentTime} on ${currentDay}.
-Generate the top 25 most popular and recommended titles currently available on ${serviceName}.`;
+  Generate the top ${serviceId === "pluto" ? "10" : "25"} most popular and recommended ${serviceId === "pluto" ? "channels" : "titles"} currently available on ${serviceName}.`;
 
-  if (serviceId === "livetv") {
+  if (serviceId === "pluto") {
+    prompt += ` Focus on Pluto TV's free live channels — use channel_name for the Pluto TV channel name (e.g. "Pluto TV Movies", "Pluto TV Sci-Fi") and current_show for what is playing on that channel.`;
+  } else if (serviceId === "livetv") {
     prompt += ` Focus on what is live right now across major broadcast and cable channels.`;
   } else {
     prompt += ` Focus on what is trending, newly released, or highly rated on ${serviceName} right now.`;

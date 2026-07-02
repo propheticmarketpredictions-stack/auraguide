@@ -12,6 +12,7 @@ const SERVICE_SEARCH_URLS = {
   peacock: (title) => `https://www.peacocktv.com/search?q=${encodeURIComponent(title)}`,
   paramount: (title) => `https://www.paramountplus.com/search/?q=${encodeURIComponent(title)}`,
   disney: (title) => `https://www.disneyplus.com/search/${encodeURIComponent(title)}`,
+  pluto: (title) => `https://pluto.tv/live-tv/category/on-demand?search=${encodeURIComponent(title)}`,
   livetv: (title) => `https://www.google.com/search?q=${encodeURIComponent(title + " watch live")}`,
 };
 

@@ -10,6 +10,7 @@ const SERVICES = [
   { id: "peacock", label: "Peacock", color: "text-purple-400", bg: "bg-purple-400/10 border-purple-400/40", emoji: "🦚" },
   { id: "paramount", label: "Paramount+", color: "text-blue-500", bg: "bg-blue-500/10 border-blue-500/40", emoji: "⭐" },
   { id: "disney", label: "Disney+", color: "text-indigo-400", bg: "bg-indigo-400/10 border-indigo-400/40", emoji: "✨" },
+  { id: "pluto", label: "Pluto TV", color: "text-yellow-400", bg: "bg-yellow-400/10 border-yellow-400/40", emoji: "🪐" },
   { id: "livetv", label: "Live TV", color: "text-red-400", bg: "bg-red-400/10 border-red-400/40", emoji: "📡" },
 ];
 
