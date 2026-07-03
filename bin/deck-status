@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# deck-status — portfolio overview: every project, its event count, open NEEDS-YOU queue,
+# dud count, and last checkpoint/decision. The CLI seed of the future "thumb-scroll" dashboard.
+set -euo pipefail
+BIN="$(cd "$(dirname "$0")" && pwd)"; DECK="$(cd "$BIN/.." && pwd)"; ROOT="$DECK/projects"
+shopt -s nullglob
+dirs=( "$ROOT"/*/ )
+[ ${#dirs[@]} -gt 0 ] || { echo "(no projects yet — deck new <project>)"; exit 0; }
+printf '%-18s %-7s %-6s %-5s  %s\n' PROJECT EVENTS QUEUE DUDS LAST
+for d in "${dirs[@]}"; do
+  [ -f "$d/bus.jsonl" ] || continue
+  python3 - "$d/bus.jsonl" "$(basename "$d")" <<'PY'
+import json, sys
+f, p = sys.argv[1], sys.argv[2]
+ev = q = dud = 0; last = ""
+for line in open(f):
+    try: r = json.loads(line)
+    except: continue
+    ev += 1; t = r.get("type"); txt = r.get("text", "")
+    if t == "task" and txt.startswith("NEEDS YOU"): q += 1
+    if t == "dud": dud += 1
+    if t in ("checkpoint", "decision"):
+        last = (txt.splitlines() or [""])[0][:36]
+print("%-18s %-7d %-6d %-5d  %s" % (p, ev, q, dud, last))
+PY
+done

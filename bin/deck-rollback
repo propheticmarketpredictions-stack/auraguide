@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# deck-rollback <project> [--to <sha>]
+# The dud engine. Reset the project's linked repo to the last good checkpoint (or --to <sha>),
+# AFTER saving current work to a recovery branch, then inject the latest dud reason onto the
+# bus as a redraft task. Destructive to the working tree — but the pre-rollback state is saved
+# first, so nothing is truly lost.
+set -euo pipefail
+BIN="$(cd "$(dirname "$0")" && pwd)"
+PROJ="${1:?usage: deck-rollback <project> [--to <sha>]}"; shift || true
+TO=""; if [ "${1:-}" = "--to" ]; then TO="$2"; shift 2; fi
+DIR="$("$BIN/bus" path "$PROJ")"; [ -d "$DIR" ] || { echo "no such project: $PROJ" >&2; exit 1; }
+[ -f "$DIR/workdir" ] || { echo "no work repo linked  (deck link $PROJ <path>)" >&2; exit 1; }
+WORK="$(cat "$DIR/workdir")"
+git -C "$WORK" rev-parse --git-dir >/dev/null 2>&1 || { echo "linked path is not a git repo: $WORK" >&2; exit 1; }
+
+TARGET="$TO"
+if [ -z "$TARGET" ]; then
+  [ -s "$DIR/checkpoints.tsv" ] || { echo "no checkpoints for $PROJ  (deck checkpoint first)" >&2; exit 1; }
+  TARGET="$(tail -n 1 "$DIR/checkpoints.tsv" | cut -f2)"
+fi
+git -C "$WORK" rev-parse --verify "$TARGET^{commit}" >/dev/null 2>&1 || { echo "not a valid commit in $WORK: $TARGET" >&2; exit 1; }
+
+TS="$(date -u '+%Y%m%dT%H%M%SZ')"
+CUR="$(git -C "$WORK" rev-parse HEAD)"
+BK="deck-predud-$TS"
+git -C "$WORK" branch "$BK" "$CUR" >/dev/null 2>&1 || true   # recovery point — nothing lost
+git -C "$WORK" reset --hard "$TARGET" >/dev/null
+
+# Latest dud reason from the machine feed, if any.
+DUD="$(python3 - "$DIR/bus.jsonl" <<'PY'
+import json, sys
+last = ""
+try:
+    for line in open(sys.argv[1]):
+        try: r = json.loads(line)
+        except: continue
+        if r.get("type") == "dud": last = r.get("text", "")
+except FileNotFoundError:
+    pass
+print(last)
+PY
+)"
+MSG="REDRAFT from ${TARGET:0:12}."
+[ -n "$DUD" ] && MSG="$MSG  Dud reason: $DUD"
+MSG="$MSG  (pre-rollback state saved on branch $BK)"
+"$BIN/bus" task "$PROJ" deck "$MSG" >/dev/null
+"$BIN/bus" checkpoint "$PROJ" "rolled back to ${TARGET:0:12} (recovery: $BK)" >/dev/null
+echo "rolled back $WORK -> ${TARGET:0:12}   (recovery branch: $BK)"

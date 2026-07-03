@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# anchor — AnchorSmith, your clone's confidence-gated router.
+# v1 scope: DOCUMENTS + ROUTING ONLY. No shell access, no execution. It reads a project's
+# bus and your decision profile, then either logs a decision (high confidence) or queues the
+# call for you (low confidence). Every call is transparent on the bus.
+#
+#   anchor propose <project> "<question or decision to make>"
+#   anchor propose <project> --model deepseek-v4-pro "<...>"
+#
+# Gate: VERDICT=DECIDE and CONFIDENCE >= ANCHOR_GATE (default 75) -> logs a bus decision.
+# Otherwise -> queues a bus task tagged "NEEDS YOU". Blank/template profile -> always queues.
+set -euo pipefail
+DECK="$(cd "$(dirname "$0")/.." && pwd)"
+BUS="$DECK/bin/bus"
+PROXY="${MESH_PROXY:-http://127.0.0.1:8787/}"
+TOKEN="${MESH_TOKEN:-$( { cat "$DECK/.token" 2>/dev/null; cat /home/coder/mesh/.token 2>/dev/null; } | head -1 || true )}"
+GATE="${ANCHOR_GATE:-75}"
+MODEL="deepseek-v4-pro"
+
+sub="${1:-}"; shift || true
+[ "$sub" = propose ] || { grep '^#' "$0" | sed 's/^#\{1,\} \{0,1\}//'; exit 1; }
+if [ "${1:-}" = "--model" ]; then MODEL="$2"; shift 2; fi
+PROJ="${1:?anchor propose <project> \"<question>\"}"; shift || true
+Q="$*"
+[ -n "$Q" ] || { echo "need a question/decision to propose" >&2; exit 1; }
+[ -n "$TOKEN" ] || { echo "no proxy token (set MESH_TOKEN or $DECK/.token)" >&2; exit 1; }
+DIR="$("$BUS" path "$PROJ")"; [ -d "$DIR" ] || { echo "no such project: $PROJ  (deck new $PROJ)" >&2; exit 1; }
+
+PROFILE="$DECK/profile/clone-profile.md"; [ -f "$PROFILE" ] || PROFILE="$DECK/profile/clone-profile.template.md"
+PROFILE_TXT="$(cat "$PROFILE")"
+FEED_TXT="$(tail -n 40 "$DIR/bus.log" 2>/dev/null || true)"
+
+# Assemble the prompt with printf '%s\n' so embedded $ / backticks in the profile or feed are
+# NEVER evaluated (injection-safe — %s is literal).
+PROMPT=$(printf '%s\n' \
+"You are AnchorSmith, the user's decision clone. Decide AS the user would, using ONLY their" \
+"decision profile below. You have NO shell access; you produce a decision or a routing call," \
+"nothing else. If the profile is a blank template, or the call is outward/irreversible, or it" \
+"falls outside the profile, you MUST queue it (VERDICT: QUEUE) rather than guess." \
+"" \
+"=== DECISION PROFILE ===" \
+"$PROFILE_TXT" \
+"" \
+"=== RECENT PROJECT BUS (project: $PROJ) ===" \
+"$FEED_TXT" \
+"" \
+"=== CALL TO DECIDE ===" \
+"$Q" \
+"" \
+"Respond in EXACTLY this shape, these four lines, nothing before them:" \
+"RATIONALE: <2-4 sentences, in the user's voice, grounded in specific profile points>" \
+"DECISION: <the concrete call, or (deferred) if queuing>" \
+"CONFIDENCE: <integer 0-100, how sure this matches what the user would actually do>" \
+"VERDICT: DECIDE or QUEUE")
+
+BODY=$(jq -n --arg t "$TOKEN" --arg m "$MODEL" --arg p "$PROMPT" \
+  '{token:$t, model:$m, messages:[{role:"user",content:$p}]}')
+RESP=$(curl -s -X POST "$PROXY" -H 'content-type: application/json' -d "$BODY")
+OUT=$(printf '%s' "$RESP" | jq -r '.reply // ("ERROR: " + (.error // "no reply"))')
+case "$OUT" in ERROR:*) echo "$OUT" >&2; exit 1 ;; esac
+
+# Parse the gate signals (tolerant: first CONFIDENCE / VERDICT line wins).
+CONF=$(printf '%s\n' "$OUT" | sed -n 's/.*CONFIDENCE:[[:space:]]*\([0-9]\{1,3\}\).*/\1/p' | head -1)
+VERD=$(printf '%s\n' "$OUT" | sed -n 's/.*VERDICT:[[:space:]]*\([A-Za-z]*\).*/\1/p'      | head -1 | tr '[:lower:]' '[:upper:]')
+CONF="${CONF:-0}"; VERD="${VERD:-QUEUE}"
+
+printf '\033[1;36m%s\033[0m\n' "$OUT"
+
+if [ "$VERD" = DECIDE ] && [ "$CONF" -ge "$GATE" ]; then
+  "$BUS" decision "$PROJ" anchor "$(printf '%s\n[gate: confidence %s >= %s -> DECIDED by clone]' "$OUT" "$CONF" "$GATE")" >/dev/null
+  printf '\033[1;32m-> logged as a DECISION on %s (confidence %s/%s)\033[0m\n' "$PROJ" "$CONF" "$GATE" >&2
+else
+  "$BUS" task "$PROJ" anchor "$(printf 'NEEDS YOU (confidence %s < gate %s, or out-of-profile / outward):\nQ: %s\n--- clone draft ---\n%s' "$CONF" "$GATE" "$Q" "$OUT")" >/dev/null
+  printf '\033[1;33m-> QUEUED for you on %s (confidence %s/%s)\033[0m\n' "$PROJ" "$CONF" "$GATE" >&2
+fi

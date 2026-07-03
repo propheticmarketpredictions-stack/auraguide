@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# ask <project> <model> "<prompt>"
+# Query a model through the FloatDock/Venice proxy, print the reply, and post BOTH the
+# prompt and the reply onto that project's bus — so every pane and every background agent
+# subscribed to the bus sees the exchange. Same proxy + token as the mesh (same box);
+# this grows the mesh, it does not replace it.
+#
+#   ask deck-p1 deepseek-v4-pro "draft the bus event schema"
+set -euo pipefail
+DECK="$(cd "$(dirname "$0")/.." && pwd)"
+BUS="$DECK/bin/bus"
+PROXY="${MESH_PROXY:-http://127.0.0.1:8787/}"
+# Token precedence: env, deck-local .token, then the mesh's existing token (never committed).
+TOKEN="${MESH_TOKEN:-$( { cat "$DECK/.token" 2>/dev/null; cat /home/coder/mesh/.token 2>/dev/null; } | head -1 || true )}"
+
+[ $# -ge 3 ] || { echo 'usage: ask <project> <model> "<prompt>"' >&2; exit 1; }
+[ -n "$TOKEN" ] || { echo "no proxy token (set MESH_TOKEN or put it in $DECK/.token)" >&2; exit 1; }
+PROJ="$1"; MODEL="$2"; shift 2; PROMPT="$*"
+
+"$BUS" post "$PROJ" "you>$MODEL" "$PROMPT" >/dev/null
+
+BODY=$(jq -n --arg t "$TOKEN" --arg m "$MODEL" --arg p "$PROMPT" \
+  '{token:$t, model:$m, messages:[{role:"user",content:$p}]}')
+RESP=$(curl -s -X POST "$PROXY" -H 'content-type: application/json' -d "$BODY")
+REPLY=$(printf '%s' "$RESP" | jq -r '.reply // ("ERROR: " + (.error // "no reply"))')
+BAL=$(printf '%s' "$RESP" | jq -r '.balance // empty')
+
+printf '%s\n' "$REPLY"                                   # clean reply to stdout (capturable)
+[ -n "$BAL" ] && printf '\033[2m(balance: %s)\033[0m\n' "$BAL" >&2
+"$BUS" post "$PROJ" "$MODEL" "$REPLY" >/dev/null

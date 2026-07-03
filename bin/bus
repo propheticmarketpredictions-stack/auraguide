@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# bus — the Deck project bus. One append-only feed per project that every
+# participant (you, the on-screen AIs, and background workers) reads and writes.
+# This is the P1 kernel of the Deck spec: the bus at the center, not conversations.
+#
+#   bus new <project>                        create a project + its bus
+#   bus ls                                   list projects
+#   bus post <project> <who> "<msg>"         append a message event
+#   bus decision <project> <who> "<text>"    append a logged decision (AnchorSmith fuel)
+#   bus checkpoint <project> "<label>"       mark a milestone (a grave-check point)
+#   bus dud <project> "<why>"                flag current state a dud (redraft marker)
+#   bus task <project> <who> "<text>"        append a task/handoff
+#   bus feed <project>                       print the whole human feed
+#   bus tail <project>                       follow the feed (for a lounge/bus pane)
+#   bus path <project>                       print the project dir
+#
+# Each event lands in projects/<project>/bus.log (human) and bus.jsonl (machine-readable,
+# for the future dashboard + the dud/rollback engine). Runtime feeds are gitignored.
+set -euo pipefail
+DECK="$(cd "$(dirname "$0")/.." && pwd)"
+ROOT="$DECK/projects"
+
+die(){ echo "bus: $*" >&2; exit 1; }
+proj_dir(){ echo "$ROOT/$1"; }
+need_proj(){ [ -d "$(proj_dir "$1")" ] || die "no such project: $1  (bus new $1)"; }
+
+append(){ # append <project> <type> <who> <text>
+  local dir; dir="$(proj_dir "$1")"
+  local ts; ts="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+  # Serialize appends: web + tmux + relay + workers all write this bus concurrently, and a
+  # multi-KB reply landing at the same time as another write would otherwise tear a JSONL
+  # line and break the SSE parser. flock makes each append atomic.
+  ( flock 9
+  python3 - "$dir" "$ts" "$2" "$3" "$4" <<'PY'
+import json, os, sys
+dir, ts, typ, who, text = sys.argv[1:6]
+with open(os.path.join(dir, "bus.jsonl"), "a") as f:
+    f.write(json.dumps({"ts": ts, "type": typ, "who": who, "text": text}) + "\n")
+tag = {"msg": ">>", "decision": "**", "checkpoint": "##", "dud": "XX", "task": "->"}.get(typ, ">>")
+with open(os.path.join(dir, "bus.log"), "a") as f:
+    f.write("\n[%s] %s %s (%s)\n%s\n" % (ts, tag, who, typ, text))
+PY
+  ) 9>"$dir/.buslock"
+}
+
+cmd="${1:-}"; shift || true
+case "$cmd" in
+  new)
+    p="${1:?bus new <project>}"; d="$(proj_dir "$p")"
+    [ -d "$d" ] && die "already exists: $p"
+    mkdir -p "$d"; : > "$d/bus.log"; : > "$d/bus.jsonl"
+    append "$p" checkpoint deck "project created"
+    echo "created $d" ;;
+  ls)
+    [ -d "$ROOT" ] || { echo "(no projects yet — bus new <project>)"; exit 0; }
+    found=$(find "$ROOT" -maxdepth 1 -mindepth 1 -type d -printf '%f\n' | sort)
+    [ -n "$found" ] && echo "$found" || echo "(no projects yet — bus new <project>)" ;;
+  post)       p="${1:?}"; who="${2:?}"; shift 2; need_proj "$p"; append "$p" msg        "$who" "$*" ;;
+  decision)   p="${1:?}"; who="${2:?}"; shift 2; need_proj "$p"; append "$p" decision   "$who" "$*" ;;
+  task)       p="${1:?}"; who="${2:?}"; shift 2; need_proj "$p"; append "$p" task       "$who" "$*" ;;
+  checkpoint) p="${1:?}"; shift;                 need_proj "$p"; append "$p" checkpoint "you"  "$*" ;;
+  dud)        p="${1:?}"; shift;                 need_proj "$p"; append "$p" dud        "you"  "$*" ;;
+  feed)       p="${1:?}"; need_proj "$p"; cat "$(proj_dir "$p")/bus.log" ;;
+  tail)       p="${1:?}"; need_proj "$p"; touch "$(proj_dir "$p")/bus.log"; exec tail -f "$(proj_dir "$p")/bus.log" ;;
+  path)       p="${1:?}"; echo "$(proj_dir "$p")" ;;
+  *) grep '^#' "$0" | sed 's/^#\{1,\} \{0,1\}//'; exit 1 ;;
+esac

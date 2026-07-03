@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# relay <project> [--loops N] "<task>" <model> <model> [<model> ...]
+# Auto-router: pipe a task through a chain of models on a project bus. Each model builds
+# on the previous one's output; every step lands on the project bus; the final result
+# prints to stdout. This is the automated version of the mesh hand-off — model A's output
+# becomes model B's input, through the shared feed.
+#
+#   relay deck-p1 "design the dud/rollback flow" deepseek-v4-pro zai-org-glm-5
+#   relay deck-p1 --loops 2 "refine the spec" mistral-small-3-2-24b-instruct deepseek-v4-pro
+#
+# Cost is visible: (models x loops) proxy calls total. Stops early if a step errors.
+set -euo pipefail
+DECK="$(cd "$(dirname "$0")/.." && pwd)"
+ASK="$DECK/bin/ask"; BUS="$DECK/bin/bus"
+
+[ $# -ge 3 ] || { echo 'usage: relay <project> [--loops N] "<task>" <model> [<model> ...]' >&2; exit 1; }
+PROJ="$1"; shift
+LOOPS=1; if [ "${1:-}" = "--loops" ]; then LOOPS="$2"; shift 2; fi
+TASK="$1"; shift; MODELS=( "$@" )
+[ ${#MODELS[@]} -ge 1 ] || { echo "need at least one model" >&2; exit 1; }
+
+"$BUS" task "$PROJ" relay "relay start: $TASK  (${#MODELS[@]} model(s) x $LOOPS loop(s))" >/dev/null
+latest="$TASK"; prev="(task)"; step=0
+for ((l=1; l<=LOOPS; l++)); do
+  for m in "${MODELS[@]}"; do
+    step=$((step+1))
+    if [ "$step" -eq 1 ]; then
+      prompt="$TASK"
+    else
+      prompt="Task: $TASK
+
+Previous contribution (from $prev):
+$latest
+
+Build on it directly. Be concrete and concise. Do not repeat it verbatim."
+    fi
+    printf '\033[1;35m-- step %d: %s --\033[0m\n' "$step" "$m" >&2
+    latest="$("$ASK" "$PROJ" "$m" "$prompt")"
+    prev="$m"
+    case "$latest" in ERROR:*) echo "relay stopped: $latest" >&2; break 2 ;; esac
+  done
+done
+"$BUS" checkpoint "$PROJ" "relay done (final from $prev)" >/dev/null
+printf '\n\033[1;32m== final (from %s) ==\033[0m\n%s\n' "$prev" "$latest"

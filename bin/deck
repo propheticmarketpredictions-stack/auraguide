@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# deck — top-level CLI for the Deck orchestration workspace.
+#
+#   deck new <project>                   create a project + its bus
+#   deck ls                              list projects
+#   deck status                          portfolio overview (events / queue / duds / last)
+#   deck open <project>                  6-pane tmux grid wired to that project's bus
+#   deck feed <project>                  print the project feed
+#   deck ask <project> <model> "<p>"     one model call, logged onto the bus
+#   deck relay <project> ... <models>    chain models on the bus (auto-router)
+#   deck anchor <project> "<call>"       clone router: decide (gated) or queue for you
+#   deck link <project> <path>           associate a work git repo with the project
+#   deck checkpoint <project> "<label>"  grave-check: bus + git snapshot (restorable)
+#   deck rollback <project> [--to <sha>] dud engine: reset repo to last good + redraft task
+#   deck backup [dest]                   snapshot all project feeds (the nightly safety)
+#
+# Put bin/ on PATH (`export PATH="/home/coder/deck/bin:$PATH"`) to call bus/ask/relay direct.
+set -euo pipefail
+BIN="$(cd "$(dirname "$0")" && pwd)"
+c="${1:-}"; shift || true
+case "$c" in
+  new)        exec "$BIN/bus" new "$@" ;;
+  ls)         exec "$BIN/bus" ls ;;
+  feed)       exec "$BIN/bus" feed "$@" ;;
+  post|decision|task|dud|tail|path) exec "$BIN/bus" "$c" "$@" ;;
+  ask)        exec "$BIN/ask" "$@" ;;
+  relay)      exec "$BIN/relay" "$@" ;;
+  anchor)     exec "$BIN/anchor" propose "$@" ;;
+  open)       exec "$BIN/deck-grid" "$@" ;;
+  status)     exec "$BIN/deck-status" ;;
+  link)       exec "$BIN/deck-link" "$@" ;;
+  checkpoint) exec "$BIN/deck-checkpoint" "$@" ;;
+  rollback)   exec "$BIN/deck-rollback" "$@" ;;
+  backup)     exec "$BIN/deck-backup" "$@" ;;
+  *) grep '^#' "$0" | sed 's/^#\{1,\} \{0,1\}//'; exit 1 ;;
+esac

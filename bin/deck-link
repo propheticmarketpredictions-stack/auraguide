@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# deck-link <project> <path-to-git-repo>
+# Associate a project bus with the working git repo it orchestrates, so checkpoints can
+# snapshot it and `deck rollback` can reset it. One agent per repo — the spec's rule.
+set -euo pipefail
+BIN="$(cd "$(dirname "$0")" && pwd)"
+PROJ="${1:?usage: deck-link <project> <path>}"; RAW="${2:?usage: deck-link <project> <path>}"
+DIR="$("$BIN/bus" path "$PROJ")"; [ -d "$DIR" ] || { echo "no such project: $PROJ  (deck new $PROJ)" >&2; exit 1; }
+WORK="$(cd "$RAW" 2>/dev/null && pwd)" || { echo "no such path: $RAW" >&2; exit 1; }
+git -C "$WORK" rev-parse --git-dir >/dev/null 2>&1 || { echo "not a git repo: $WORK" >&2; exit 1; }
+printf '%s\n' "$WORK" > "$DIR/workdir"
+"$BIN/bus" post "$PROJ" deck "linked work repo: $WORK" >/dev/null
+echo "linked $PROJ -> $WORK"

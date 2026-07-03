@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# deck-checkpoint <project> "<label>"
+# Log a checkpoint on the bus AND, if a work repo is linked, record its current git commit as
+# a restorable point (a grave-check). `deck rollback` returns the repo to here.
+set -euo pipefail
+BIN="$(cd "$(dirname "$0")" && pwd)"
+PROJ="${1:?usage: deck-checkpoint <project> \"<label>\"}"; shift || true
+LABEL="$*"; [ -n "$LABEL" ] || LABEL="checkpoint"
+DIR="$("$BIN/bus" path "$PROJ")"; [ -d "$DIR" ] || { echo "no such project: $PROJ" >&2; exit 1; }
+
+SHA=""
+if [ -f "$DIR/workdir" ]; then
+  WORK="$(cat "$DIR/workdir")"
+  git -C "$WORK" rev-parse --git-dir >/dev/null 2>&1 && SHA="$(git -C "$WORK" rev-parse HEAD 2>/dev/null || true)"
+fi
+
+TS="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+if [ -n "$SHA" ]; then
+  printf '%s\t%s\t%s\n' "$TS" "$SHA" "$LABEL" >> "$DIR/checkpoints.tsv"
+  "$BIN/bus" checkpoint "$PROJ" "$LABEL  [git ${SHA:0:12}]" >/dev/null
+  echo "checkpoint $PROJ @ ${SHA:0:12}  ($LABEL)"
+else
+  "$BIN/bus" checkpoint "$PROJ" "$LABEL" >/dev/null
+  echo "checkpoint $PROJ  ($LABEL)  [no linked git repo — bus-only]"
+fi

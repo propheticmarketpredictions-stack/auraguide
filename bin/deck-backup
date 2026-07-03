@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# deck-backup [dest-dir]
+# The nightly safety. Snapshot every project's feeds (bus.jsonl/bus.log), checkpoints, and
+# workdir pointer into a timestamped folder. Point dest at a private backup repo and cron it.
+# The feeds are the source of truth; project code already lives in its own git repo.
+set -euo pipefail
+BIN="$(cd "$(dirname "$0")" && pwd)"; DECK="$(cd "$BIN/.." && pwd)"; ROOT="$DECK/projects"
+DEST="${1:-$DECK/backups}"; TS="$(date -u '+%Y%m%dT%H%M%SZ')"; OUT="$DEST/$TS"
+mkdir -p "$OUT"
+n=0
+shopt -s nullglob
+for d in "$ROOT"/*/; do
+  p="$(basename "$d")"; mkdir -p "$OUT/$p"
+  for f in bus.jsonl bus.log checkpoints.tsv workdir; do
+    [ -f "$d/$f" ] && cp "$d/$f" "$OUT/$p/$f"
+  done
+  n=$((n+1))
+done
+echo "backed up $n project(s) -> $OUT"
