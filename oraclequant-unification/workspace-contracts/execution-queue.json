@@ -1,0 +1,113 @@
+{
+  "schema_version": "1",
+  "items": [
+    {
+      "id": "confirm-canonical-repos",
+      "repo": "workspace-contracts",
+      "step": "Confirm or revise canonical, duplicate, and archive decisions.",
+      "depends_on": [],
+      "reversible_by": "Edit or delete CANONICAL_REPOS.md",
+      "risk": "low",
+      "status": "ready"
+    },
+    {
+      "id": "validate-all-manifests",
+      "repo": "workspace-contracts",
+      "step": "Run the manifest validator and fix any schema drift before implementation work.",
+      "depends_on": [
+        "confirm-canonical-repos"
+      ],
+      "reversible_by": "Delete validation script or index files",
+      "risk": "low",
+      "status": "ready"
+    },
+    {
+      "id": "prism-contract-stubs",
+      "repo": "prism",
+      "step": "Add reversible contract stubs for UserRef, WalletEvent, UsageEvent, and SubscriptionTier.",
+      "depends_on": [
+        "validate-all-manifests"
+      ],
+      "reversible_by": "Delete new contract files",
+      "risk": "low",
+      "status": "planned"
+    },
+    {
+      "id": "prism-money-tests",
+      "repo": "prism",
+      "step": "Add tests for wallet math, tier logic, and Stripe-facing pure helpers.",
+      "depends_on": [
+        "prism-contract-stubs"
+      ],
+      "reversible_by": "Delete tests and helper extractions",
+      "risk": "medium",
+      "status": "planned"
+    },
+    {
+      "id": "oracle-signal-contracts",
+      "repo": "oraclequant",
+      "step": "Add reversible signal contracts for Market, Signal, Edge, and PositionAdvice.",
+      "depends_on": [
+        "validate-all-manifests"
+      ],
+      "reversible_by": "Delete new contract files",
+      "risk": "low",
+      "status": "planned"
+    },
+    {
+      "id": "oracle-provider-telemetry",
+      "repo": "oraclequant",
+      "step": "Add request IDs and raw provider telemetry wrappers without changing outputs.",
+      "depends_on": [
+        "oracle-signal-contracts"
+      ],
+      "reversible_by": "Remove wrapper layer",
+      "risk": "medium",
+      "status": "planned"
+    },
+    {
+      "id": "emberscot-agent-contracts",
+      "repo": "emberscot",
+      "step": "Add AgentEvent, ProjectRef, and PreferenceSignal contracts plus raw event replay notes.",
+      "depends_on": [
+        "validate-all-manifests"
+      ],
+      "reversible_by": "Delete new contract files",
+      "risk": "low",
+      "status": "planned"
+    },
+    {
+      "id": "overlayflow-overlay-contracts",
+      "repo": "overlayflow",
+      "step": "Define overlay registry and event contract shapes before any runtime analytics changes.",
+      "depends_on": [
+        "validate-all-manifests"
+      ],
+      "reversible_by": "Delete overlay registry files",
+      "risk": "low",
+      "status": "planned"
+    },
+    {
+      "id": "overlayflow-proxy-hardening-plan",
+      "repo": "overlayflow-aiproxy",
+      "step": "Prepare safer auth, usage storage, and logging boundaries as an additive plan.",
+      "depends_on": [
+        "confirm-canonical-repos"
+      ],
+      "reversible_by": "Delete plan files only",
+      "risk": "low",
+      "status": "planned"
+    },
+    {
+      "id": "quant-experiment-registry",
+      "repo": "crypto-trading-bot",
+      "step": "Add experiment registry and schema-aligned signal export.",
+      "depends_on": [
+        "oracle-signal-contracts"
+      ],
+      "reversible_by": "Delete registry/export files",
+      "risk": "medium",
+      "status": "planned"
+    }
+  ]
+}

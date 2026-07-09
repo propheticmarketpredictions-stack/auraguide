@@ -1,0 +1,492 @@
+<title>OracleQuant — One Brain, Six Ways to Wear It</title>
+<style>
+  :root{
+    --ink:#0a0c0e; --surface:#10141a; --card:#141a22; --card-2:#171e27;
+    --border:#232c37; --border-soft:#1b232d;
+    --fg:#e7eef5; --fg-dim:#aab6c4; --muted:#7b8798;
+    --signal:#2ee6a6; --risk:#ffb454; --loss:#ff5d6c;
+    --accent:#39ff88; --accent-ink:#031107;
+    --mono:ui-monospace,"JetBrains Mono","SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+    --sans:-apple-system,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --maxw:1140px;
+    --r:4px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--ink);color:var(--fg);font-family:var(--sans);
+    line-height:1.55;-webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(1100px 520px at 78% -8%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 70%),
+      radial-gradient(760px 440px at 8% 4%, #101a2280, transparent 70%);
+    transition:background-image .4s ease;
+  }
+  /* faint terminal scanlines */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:60;opacity:.5;
+    background:repeating-linear-gradient(180deg, transparent 0 2px, #00000012 2px 3px);
+    mix-blend-mode:overlay;
+  }
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+  a{color:inherit}
+  .mono{font-family:var(--mono)}
+  .tnum{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .eyebrow{
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--muted);display:inline-flex;align-items:center;gap:9px;
+  }
+  .eyebrow::before{content:"";width:22px;height:1px;background:var(--accent);opacity:.8}
+  h1,h2,h3{text-wrap:balance;margin:0;font-weight:650;letter-spacing:-.01em}
+  section{padding:76px 0;border-top:1px solid var(--border-soft)}
+  .sec-head{max-width:720px;margin-bottom:34px}
+  .sec-head h2{font-size:clamp(24px,3.3vw,34px);margin:14px 0 10px}
+  .sec-head p{color:var(--fg-dim);font-size:16px;margin:0}
+
+  /* ---- top bar ---- */
+  .topbar{position:sticky;top:0;z-index:50;backdrop-filter:blur(9px);
+    background:color-mix(in srgb, var(--ink) 82%, transparent);
+    border-bottom:1px solid var(--border-soft)}
+  .topbar .wrap{display:flex;align-items:center;gap:16px;height:56px}
+  .brand{display:flex;align-items:center;gap:11px;font-family:var(--mono);font-weight:600;letter-spacing:.02em}
+  .brand b{font-weight:700}
+  .brand .sub{color:var(--muted);font-size:11px;letter-spacing:.24em;text-transform:uppercase}
+  .topnav{margin-left:auto;display:flex;gap:22px;font-family:var(--mono);font-size:12.5px;letter-spacing:.04em}
+  .topnav a{color:var(--fg-dim);text-decoration:none;padding:6px 2px;border-bottom:1px solid transparent}
+  .topnav a:hover{color:var(--accent);border-color:var(--accent)}
+  @media(max-width:720px){.topnav{display:none}}
+
+  /* brain ring */
+  .ring{--sz:34px;width:var(--sz);height:var(--sz);flex:0 0 auto;position:relative;display:grid;place-items:center}
+  .ring svg{transform:rotate(-90deg);width:100%;height:100%}
+  .ring .track{stroke:var(--border);}
+  .ring .fill{stroke:var(--accent);stroke-linecap:round;filter:drop-shadow(0 0 4px color-mix(in srgb,var(--accent) 60%,transparent));
+    transition:stroke .3s ease;animation:ringfill 1.1s ease-out both}
+  .ring i{position:absolute;font-family:var(--mono);font-size:9px;color:var(--accent);font-style:normal}
+  @keyframes ringfill{from{stroke-dashoffset:var(--circ)}}
+  @media(prefers-reduced-motion:reduce){.ring .fill{animation:none}}
+
+  /* ---- hero ---- */
+  .hero{padding:74px 0 52px}
+  .hero-grid{display:grid;grid-template-columns:1.35fr .9fr;gap:40px;align-items:center}
+  @media(max-width:860px){.hero-grid{grid-template-columns:1fr;gap:30px}}
+  .hero h1{font-size:clamp(34px,6vw,62px);line-height:1.02;margin:18px 0 0}
+  .hero h1 .g{color:var(--accent)}
+  .lede{color:var(--fg-dim);font-size:clamp(16px,1.7vw,19px);max-width:38ch;margin:20px 0 0}
+  .boot{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:26px;line-height:1.9}
+  .boot .ok{color:var(--signal)}
+  .boot .dim{color:var(--border)}
+  .hero-card{background:linear-gradient(180deg,var(--card-2),var(--card));border:1px solid var(--border);
+    border-radius:var(--r);padding:26px}
+  .bigring{--sz:150px;margin:2px auto 16px}
+  .bigring i{font-size:26px;font-weight:600;letter-spacing:-.02em}
+  .hero-card .cap{text-align:center;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .hero-card .cap b{color:var(--fg);display:block;font-size:13px;letter-spacing:.02em;text-transform:none;margin-top:6px}
+  .hero-metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border);margin-top:22px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+  .hero-metrics div{background:var(--card);padding:12px 10px;text-align:center}
+  .hero-metrics .v{font-family:var(--mono);font-size:19px;color:var(--accent);font-variant-numeric:tabular-nums}
+  .hero-metrics .k{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.14em;margin-top:3px}
+
+  /* ---- shirt switcher (the shell mock) ---- */
+  .switch-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+  .shirt-tab{font-family:var(--mono);font-size:12.5px;letter-spacing:.03em;color:var(--fg-dim);
+    background:var(--card);border:1px solid var(--border);border-radius:999px;padding:8px 15px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:8px;transition:.15s}
+  .shirt-tab .dot{width:8px;height:8px;border-radius:50%;background:var(--tabc);box-shadow:0 0 7px var(--tabc)}
+  .shirt-tab:hover{color:var(--fg);border-color:var(--muted)}
+  .shirt-tab[aria-selected="true"]{color:var(--tabc);border-color:var(--tabc);background:color-mix(in srgb,var(--tabc) 12%,var(--card))}
+  .shirt-tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  .shell{border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--surface);
+    box-shadow:0 30px 80px -40px #000}
+  .shell-title{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#0c1116;border-bottom:1px solid var(--border)}
+  .shell-title .dots{display:flex;gap:6px}.shell-title .dots i{width:10px;height:10px;border-radius:50%;background:#2a333e;display:block}
+  .shell-title .url{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-left:8px}
+  .shell-title .url b{color:var(--accent)}
+  .shell-top{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border)}
+  .shell-top .wm{font-family:var(--mono);font-weight:700;font-size:13px}
+  .apptiles{display:flex;gap:5px;margin-left:6px}
+  .apptiles span{width:9px;height:9px;border-radius:2px;background:var(--border)}
+  .apptiles span.on{background:var(--accent);box-shadow:0 0 6px var(--accent)}
+  .shell-top .rightchip{margin-left:auto;display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .pulse{width:7px;height:7px;border-radius:50%;background:var(--signal);box-shadow:0 0 7px var(--signal);animation:pulse 1.8s infinite}
+  @keyframes pulse{50%{opacity:.35}}
+  @media(prefers-reduced-motion:reduce){.pulse{animation:none}}
+  .shell-body{display:grid;grid-template-columns:186px 1fr;min-height:340px}
+  @media(max-width:720px){.shell-body{grid-template-columns:1fr}.rail{display:none!important}}
+  .rail{border-right:1px solid var(--border);padding:14px 12px;background:#0d1218}
+  .rail .lbl{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:2px 4px 10px}
+  .rail a{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:12.5px;color:var(--fg-dim);
+    padding:8px 9px;border-radius:var(--r);text-decoration:none;margin-bottom:2px;border-left:2px solid transparent}
+  .rail a.active{color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);border-left-color:var(--accent)}
+  .rail a:hover{color:var(--fg)}
+  .stage{padding:20px 20px 24px}
+  .stage h3{font-size:18px;display:flex;align-items:center;gap:10px}
+  .stage .tag{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);
+    border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);border-radius:999px;padding:2px 9px}
+  .stage .desc{color:var(--fg-dim);font-size:14px;margin:8px 0 18px;max-width:60ch}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+  @media(max-width:560px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .kpis div{background:var(--card);padding:13px 12px}
+  .kpis .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .kpis .v{font-family:var(--mono);font-size:21px;font-variant-numeric:tabular-nums;color:var(--fg);margin-top:5px}
+  .kpis .v.acc{color:var(--accent)}
+  .predcard{margin-top:16px;border:1px solid var(--border);border-radius:var(--r);padding:15px 16px;background:var(--card);
+    display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
+  .predcard .q{font-size:14.5px}
+  .predcard .meta{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:6px}
+  .predcard .meta b{color:var(--signal)}
+  .arc{--p:72;width:74px;height:74px;position:relative;display:grid;place-items:center}
+  .arc svg{transform:rotate(-90deg)}
+  .arc .t{stroke:var(--border)}.arc .f{stroke:var(--accent);stroke-linecap:round}
+  .arc i{position:absolute;font-family:var(--mono);font-size:15px;font-style:normal;color:var(--accent);font-variant-numeric:tabular-nums}
+  .repos-in{margin-top:16px;font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.7}
+  .repos-in b{color:var(--fg-dim)}
+  .repos-in code{color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);padding:1px 6px;border-radius:3px;margin-right:6px;display:inline-block}
+  .switch-note{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:16px;text-align:center}
+  .switch-note b{color:var(--accent)}
+
+  /* ---- generic card grids ---- */
+  .grid{display:grid;gap:14px}
+  .g5{grid-template-columns:repeat(5,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  @media(max-width:900px){.g5,.g3{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:560px){.g5,.g3,.g2{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;transition:.16s}
+  .card:hover{border-color:var(--muted);transform:translateY(-2px)}
+  .card .n{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.14em}
+  .card h3{font-size:15.5px;margin:9px 0 8px}
+  .card p{color:var(--fg-dim);font-size:13.5px;margin:0}
+  .organ h3{display:flex;align-items:center;gap:9px}
+  .organ .ic{width:9px;height:9px;border-radius:2px;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+
+  /* shirt cards */
+  .shirt{border-top:2px solid var(--sc)}
+  .shirt .n{color:var(--sc)}
+  .shirt .role{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--sc);
+    border:1px solid color-mix(in srgb,var(--sc) 40%,transparent);border-radius:999px;padding:2px 8px;float:right}
+  .shirt .folds{margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .shirt .folds code{color:var(--sc);margin-right:6px;white-space:nowrap}
+
+  /* brain loop */
+  .loop{display:flex;flex-wrap:wrap;align-items:stretch;gap:0;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+  .loop .step{flex:1 1 160px;padding:18px 16px;border-right:1px solid var(--border);position:relative;background:var(--card)}
+  .loop .step:last-child{border-right:0}
+  .loop .step .s{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:.16em}
+  .loop .step h3{font-size:15px;margin:8px 0 6px}
+  .loop .step p{font-size:12.5px;color:var(--fg-dim);margin:0}
+  .loop .step::after{content:"→";position:absolute;right:-9px;top:50%;transform:translateY(-50%);color:var(--accent);font-family:var(--mono);z-index:2}
+  .loop .step:last-child::after{content:"↺";right:16px;top:14px;transform:none;opacity:.7}
+  @media(max-width:720px){.loop .step{border-right:0;border-bottom:1px solid var(--border)}.loop .step::after{content:"↓";right:50%;top:auto;bottom:-9px;transform:translateX(50%)}}
+
+  /* merge steps */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:720px){.steps{grid-template-columns:1fr}}
+  .step-c{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;border-left:3px solid var(--accent)}
+  .step-c .num{font-family:var(--mono);color:var(--accent);font-size:12px;letter-spacing:.1em}
+  .step-c h3{font-size:15px;margin:6px 0 8px}
+  .step-c p{font-size:13px;color:var(--fg-dim);margin:0}
+  .gate{margin-top:16px;border:1px solid color-mix(in srgb,var(--risk) 40%,transparent);
+    background:color-mix(in srgb,var(--risk) 8%,var(--card));border-radius:var(--r);padding:14px 16px;font-size:13.5px;color:var(--fg-dim)}
+  .gate b{color:var(--risk);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:5px}
+
+  /* migration timeline */
+  .tl{border-left:1px solid var(--border);margin-left:8px;padding-left:0}
+  .tl li{list-style:none;position:relative;padding:0 0 20px 26px}
+  .tl li::before{content:"";position:absolute;left:-5px;top:4px;width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+  .tl li .h{font-family:var(--mono);font-size:13px;color:var(--fg)}
+  .tl li .d{font-size:13px;color:var(--fg-dim);margin-top:3px}
+  .tl li code{font-family:var(--mono);color:var(--accent);font-size:12px}
+
+  /* repo disposition */
+  .disp{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  @media(max-width:900px){.disp{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:560px){.disp{grid-template-columns:1fr}}
+  .col{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+  .col h3{font-family:var(--mono);font-size:12px;letter-spacing:.06em;display:flex;justify-content:space-between;align-items:center}
+  .col .ct{color:var(--muted);font-size:11px}
+  .col ul{list-style:none;padding:0;margin:12px 0 0;display:flex;flex-wrap:wrap;gap:6px}
+  .col li{font-family:var(--mono);font-size:11px;color:var(--fg-dim);background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:3px 8px}
+  .col.trunk{border-top:2px solid var(--signal)} .col.trunk h3{color:var(--signal)}
+  .col.shirtcol{border-top:2px solid #35d0ff} .col.shirtcol h3{color:#35d0ff}
+  .col.fold{border-top:2px solid var(--risk)} .col.fold h3{color:var(--risk)}
+  .col.arch{border-top:2px solid var(--muted)} .col.arch h3{color:var(--fg-dim)}
+
+  footer{padding:40px 0 60px;border-top:1px solid var(--border-soft)}
+  .status{font-family:var(--mono);font-size:11.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+  .status .ok{color:var(--signal)}
+  .disclaimer{color:var(--muted);font-size:12px;margin-top:18px;max-width:70ch;line-height:1.6}
+  .callout{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--r);padding:16px 18px;margin-top:18px;font-size:14px;color:var(--fg-dim)}
+  .callout b{color:var(--fg)}
+</style>
+
+<div class="topbar"><div class="wrap">
+  <span class="brand">
+    <span class="ring" style="--sz:26px" aria-hidden="true"><svg viewBox="0 0 36 36"><circle class="track" cx="18" cy="18" r="15" fill="none" stroke-width="3"/><circle class="fill" cx="18" cy="18" r="15" fill="none" stroke-width="3" stroke-dasharray="94.2" style="--circ:94.2;stroke-dashoffset:26.4"/></svg></span>
+    <b>OracleQuant</b><span class="sub">Platform</span>
+  </span>
+  <nav class="topnav">
+    <a href="#shell">Shell</a><a href="#body">Body</a><a href="#shirts">Shirts</a>
+    <a href="#brain">Brain</a><a href="#merge">Merge</a><a href="#repos">Repos</a>
+  </nav>
+</div></div>
+
+<header class="hero"><div class="wrap hero-grid">
+  <div>
+    <span class="eyebrow">The broadest picture · one platform</span>
+    <h1>One <span class="g">Brain</span>.<br>Six ways to wear it.</h1>
+    <p class="lede">Forty repos collapse into a single product: OracleQuant, a personal AI Brain that gets provably sharper every time you predict — worn as markets, trading, commerce, life, a phone overlay, and the workbench that trains it.</p>
+    <div class="boot">
+      <span class="ok">▸</span> loading body ......... <span class="ok">one core, one login, one Brain</span><br>
+      <span class="ok">▸</span> mounting shirts ....... <span class="ok">6 route namespaces on one shell</span><br>
+      <span class="ok">▸</span> merge model ........... <span class="ok">contract → layer → archive · reversible</span><br>
+      <span class="dim">▸</span> live money ............ <span style="color:var(--risk)">gated · paper-first · off by default</span>
+    </div>
+  </div>
+  <aside class="hero-card">
+    <div class="ring bigring" aria-hidden="true"><svg viewBox="0 0 36 36"><circle class="track" cx="18" cy="18" r="15.5" fill="none" stroke-width="2.4"/><circle class="fill" cx="18" cy="18" r="15.5" fill="none" stroke-width="2.4" stroke-dasharray="97.4" style="--circ:97.4;stroke-dashoffset:27.3"/></svg><i class="tnum">72%</i></div>
+    <div class="cap">Brain calibration<b>Grows with every scored outcome</b></div>
+    <div class="hero-metrics">
+      <div><div class="v tnum">40→1</div><div class="k">Repos → product</div></div>
+      <div><div class="v tnum">6</div><div class="k">Shirts</div></div>
+      <div><div class="v tnum">5</div><div class="k">Shared organs</div></div>
+    </div>
+  </aside>
+</div></header>
+
+<main class="wrap">
+
+<!-- SHELL / SWITCHER -->
+<section id="shell">
+  <div class="sec-head">
+    <span class="eyebrow">The website template · live</span>
+    <h2>One shell. Swap a single token, get a different app.</h2>
+    <p>Every product renders in the same shell — top bar, app-switcher, rail, the universal prediction card, the Brain widget. Changing "shirts" swaps only one CSS accent variable and the nav manifest. The base, type, spacing and card anatomy never move. Click a shirt:</p>
+  </div>
+
+  <div class="switch-tabs" role="tablist" aria-label="Shirts"></div>
+
+  <div class="shell">
+    <div class="shell-title"><span class="dots"><i></i><i></i><i></i></span><span class="url">oraclequant.app<b id="urlpath">/markets</b></span></div>
+    <div class="shell-top">
+      <span class="ring" style="--sz:22px" aria-hidden="true"><svg viewBox="0 0 36 36"><circle class="track" cx="18" cy="18" r="15" fill="none" stroke-width="4"/><circle class="fill" cx="18" cy="18" r="15" fill="none" stroke-width="4" stroke-dasharray="94.2" style="--circ:94.2;stroke-dashoffset:26.4;animation:none"/></svg></span>
+      <span class="wm">OracleQuant</span>
+      <span class="apptiles" id="apptiles" aria-hidden="true"></span>
+      <span class="rightchip"><span class="pulse"></span> Brain synced · 2m ago</span>
+    </div>
+    <div class="shell-body">
+      <nav class="rail"><div class="lbl" id="raillbl">Markets</div><div id="rail"></div></nav>
+      <div class="stage">
+        <h3><span id="shirtName">OracleQuant Markets</span> <span class="tag" id="shirtTag">flagship</span></h3>
+        <p class="desc" id="shirtDesc"></p>
+        <div class="kpis" id="kpis"></div>
+        <div class="predcard">
+          <div>
+            <div class="q" id="predQ"></div>
+            <div class="meta" id="predMeta"></div>
+          </div>
+          <div class="arc" aria-hidden="true"><svg width="74" height="74" viewBox="0 0 36 36"><circle class="t" cx="18" cy="18" r="15.5" fill="none" stroke-width="3"/><circle class="f" id="arcF" cx="18" cy="18" r="15.5" fill="none" stroke-width="3" stroke-dasharray="97.4" stroke-dashoffset="27.3"/></svg><i id="arcT">72%</i></div>
+        </div>
+        <div class="repos-in" id="reposIn"></div>
+      </div>
+    </div>
+  </div>
+  <div class="switch-note">Same component tree. <b>One variable changed.</b> That is how six apps stay one product.</div>
+</section>
+
+<!-- BODY -->
+<section id="body">
+  <div class="sec-head">
+    <span class="eyebrow">The body · the moat</span>
+    <h2>Five shared organs. Everything else is distribution.</h2>
+    <p>The body lives in the current <code class="mono">oraclequant</code> repo + Base44 + this VPS. Each organ already exists in some form — unification is extraction, not invention.</p>
+  </div>
+  <div class="grid g5">
+    <div class="card organ"><div class="n">ORGAN 01</div><h3><span class="ic"></span>The Brain</h3><p>OracleQuant's multi-model ensemble — IQR outlier removal, confidence-weighted fusion, Platt calibration — generalized <b>per user</b>. Every prediction is scored against real outcomes and recalibrated nightly.</p></div>
+    <div class="card organ"><div class="n">ORGAN 02</div><h3><span class="ic"></span>Venice Gateway</h3><p>The single LLM access layer (<code class="mono">~/aiproxy</code>) — one key, shared cache, shared rate limits. Every shirt calls the Brain through it. The key never enters the repo tree.</p></div>
+    <div class="card organ"><div class="n">ORGAN 03</div><h3><span class="ic"></span>Contracts</h3><p>The nervous system from <code class="mono">workspace-contracts</code>: UserRef, UsageEvent, Signal, WalletEvent, AgentEvent. One identity, one event bus every shirt reports into.</p></div>
+    <div class="card organ"><div class="n">ORGAN 04</div><h3><span class="ic"></span>Risk Engine</h3><p>Vendored from the trading bots: EV math, quarter-Kelly sizing, drawdown guard. Venue-blind, paper-first — any shirt that touches money uses the same spine.</p></div>
+    <div class="card organ"><div class="n">ORGAN 05</div><h3><span class="ic"></span>The Shell</h3><p>One design system, one app-switcher, one Brain widget. Extracted from the canonical Base44 template so a single token change re-skins all six shirts in one commit.</p></div>
+  </div>
+</section>
+
+<!-- SHIRTS -->
+<section id="shirts">
+  <div class="sec-head">
+    <span class="eyebrow">Six t-shirts · one body</span>
+    <h2>Every app becomes a shirt on the same body.</h2>
+    <p>Not six products to maintain — six surfaces on one Brain. Each is a route namespace with its own accent, feeding the same core.</p>
+  </div>
+  <div class="grid g3" id="shirtGrid"></div>
+</section>
+
+<!-- BRAIN -->
+<section id="brain">
+  <div class="sec-head">
+    <span class="eyebrow">Grow your own AI brain · the core loop</span>
+    <h2>Not a tagline. The body's flywheel — and it's 80% built.</h2>
+    <p>You are not renting a chatbot. You are raising something that is yours: it knows your risk from Autopilot, your taste from Commerce, your chart from Life, your conviction from Markets — and it gets provably smarter because <b>you</b> fed it.</p>
+  </div>
+  <div class="loop">
+    <div class="step"><div class="s">01 · PREDICT</div><h3>You make a call</h3><p>Any shirt logs the question, the Brain's probability, and your own call.</p></div>
+    <div class="step"><div class="s">02 · ACT</div><h3>Something happens</h3><p>A trade is placed, a product launched, a course chosen, a market entered.</p></div>
+    <div class="step"><div class="s">03 · OUTCOME</div><h3>Reality settles</h3><p>Market resolves, P&amp;L lands, result confirmed — one Outcome event.</p></div>
+    <div class="step"><div class="s">04 · RECALIBRATE</div><h3>The Brain rescales</h3><p>A nightly job rescales your Brain against its scored outcomes. Brier improves.</p></div>
+    <div class="step"><div class="s">05 · GROW</div><h3>The ring thickens</h3><p>Measurably sharper. The Brain Ring in every header fills a little more.</p></div>
+  </div>
+  <div class="callout"><b>Investor frame:</b> every shirt is a data-flywheel intake for one compounding per-user asset. Retention comes from sunk training; the moat is calibration data no competitor can replay. Product hooks are baked into the body — the Brain Ring in every header, "Your Brain vs the market" scorecards, a weekly "What your Brain learned" briefing, and Brain export as the trust promise.</div>
+</section>
+
+<!-- MERGE -->
+<section id="merge">
+  <div class="sec-head">
+    <span class="eyebrow">Merged correctly · reversible</span>
+    <h2>One trunk, six branches — merged by contract, not copy-paste.</h2>
+    <p>The classic mistake is letting apps become long-lived branches. Here, branches are only ever for migration and features. Each shirt joins in three reversible steps, and nothing user-visible breaks along the way.</p>
+  </div>
+  <div class="steps">
+    <div class="step-c"><div class="num">STEP 1</div><h3>Contract</h3><p>The app keeps running where it is but adopts the shared contracts — UserRef login, UsageEvent/Signal emission into the Brain. Purely additive. Rollback = delete the adapter.</p></div>
+    <div class="step-c"><div class="num">STEP 2</div><h3>Layer</h3><p>Pages move into the trunk as a route namespace (<code class="mono">/markets</code>, <code class="mono">/life</code>…) via <code class="mono">git subtree</code> — full history preserved — with its own entity namespace and one accent token, rendered in the shared shell.</p></div>
+    <div class="step-c"><div class="num">STEP 3</div><h3>Archive</h3><p>Once contract parity is proven, the old repo is frozen with a pointer README. Duplicates fold into their canonical; spec-only repos archive after their decisions are captured.</p></div>
+  </div>
+  <div class="gate"><b>The live-money gate</b>Headless services (Autopilot, aiproxy) never move into the shell — only their control surfaces do. Trading engines merge to trunk in <b>paper mode only</b>. Enabling real money requires a manual <code class="mono">live/*</code> promote <i>plus</i> a secret file outside the repo tree <i>plus</i> a runtime flag. No ordinary merge can flip real money on.</div>
+</section>
+
+<!-- MIGRATION -->
+<section id="order">
+  <div class="sec-head">
+    <span class="eyebrow">Execution order · safe sequence</span>
+    <h2>The pullback: set the launch up perfectly, then let it fly.</h2>
+    <p>A real sequence — each step ships value and is independently reversible. The working apps (Markets, Prism, OverlayFlow, the bots) never go dark.</p>
+  </div>
+  <ol class="tl">
+    <li><div class="h">1 · Trunk prep</div><div class="d">Extract the Brain service (ensemble + per-user calibration) out of <code>oraclequant</code>; merge <code>oraclequant-copy</code> and archive it; ship the shell around the existing Markets pages. Markets is shirt #1 by definition.</div></li>
+    <li><div class="h">2 · Contracts on the pilots</div><div class="d"><code>prism</code>, <code>emberscot</code>, <code>overlayflow</code> adopt UserRef + UsageEvent/Signal emission. Additive adapters only — rollback is removing the adapter.</div></li>
+    <li><div class="h">3 · Autopilot online</div><div class="d">Stand up <code>crypto-trading-bot</code> as a headless paper service, vendoring the kalshi engine. Add the <code>/autopilot</code> control surface. First cross-shirt proof: Markets predictions scored by Autopilot outcomes.</div></li>
+    <li><div class="h">4 · Commerce joins</div><div class="d"><code>prism</code> pages move into <code>/commerce</code>; promote its billing stack <b>up</b> into the body as the shared payments layer for all shirts.</div></li>
+    <li><div class="h">5 · Life consolidation</div><div class="d">Fold <code>celestial-guidance</code> + <code>inkwell-prophet</code> + <code>cosmic-passport</code> (+ <code>auraguide</code>) into one <code>/life</code>. Their prompts become Brain question types; the birth-profile becomes Brain context.</div></li>
+    <li><div class="h">6 · Pocket alignment</div><div class="d"><code>overlayflow-aiproxy</code> merges into the shared Venice gateway; <code>overlayflow-android</code> becomes a thin renderer of the universal prediction card over the contracts.</div></li>
+    <li><div class="h">7 · Forge + retirement sweep</div><div class="d"><code>emberscot</code> becomes <code>/forge</code> using <code>deck</code>'s local-first bus/checkpoint patterns. Archive the long tail after salvaging any prompts/schemas into Brain question types. Every archive gets a pointer README.</div></li>
+  </ol>
+</section>
+
+<!-- REPO DISPOSITION -->
+<section id="repos">
+  <div class="sec-head">
+    <span class="eyebrow">All the VPS files · accounted for</span>
+    <h2>Where every repo lands.</h2>
+    <p>Nothing gets lost — every project is a trunk organ, a shirt, a fold-in, or a documented archive.</p>
+  </div>
+  <div class="disp">
+    <div class="col trunk"><h3>Trunk / Body <span class="ct">core</span></h3><ul>
+      <li>oraclequant</li><li>workspace-contracts</li><li>aiproxy (svc)</li><li>ai-workspace</li><li>deck</li>
+    </ul></div>
+    <div class="col shirtcol"><h3>Shirts <span class="ct">6 surfaces</span></h3><ul>
+      <li>oraclequant → Markets</li><li>crypto-trading-bot → Autopilot</li><li>prism → Commerce</li><li>emberscot → Forge</li><li>overlayflow → Pocket</li><li>celestial-guidance → Life</li>
+    </ul></div>
+    <div class="col fold"><h3>Fold-in <span class="ct">into a shirt</span></h3><ul>
+      <li>oraclequant-copy</li><li>kalshi-trading-bot</li><li>overlayflow-aiproxy</li><li>overlayflow-android</li><li>inkwell-prophet</li><li>cosmic-passport</li><li>auraguide</li>
+    </ul></div>
+    <div class="col arch"><h3>Archive / salvage <span class="ct">freeze + pointer</span></h3><ul>
+      <li>cryptomansion</li><li>extremehappy</li><li>novaname</li><li>novavault</li><li>nebulachat</li><li>seth-copy</li><li>seth-copy2</li><li>zeroday-walls</li><li>urban-alchemist</li><li>arcanum-vault</li><li>aeris-biologics</li><li>alpha-chronograph</li><li>bridgeconnect</li><li>cloakphone</li><li>cognitoboost</li><li>escrowvault</li><li>folio</li><li>kernelhub</li><li>syncpulse</li><li>vaultlaunch</li><li>vaultpaper</li><li>velvet</li><li>ebay-integration</li><li>oracle-app-ICJAVELIN</li>
+    </ul></div>
+  </div>
+</section>
+
+</main>
+
+<footer><div class="wrap">
+  <div class="status">
+    <span><span class="ok">●</span> SYSTEM READY</span>
+    <span>brain v1 · calibration 72%</span>
+    <span>trunk: oraclequant</span>
+    <span>live-money: <span style="color:var(--risk)">OFF</span></span>
+    <span>shirts mounted: 6/6</span>
+  </div>
+  <p class="disclaimer">Unified product architecture for the propheticmarketpredictions-stack workspace. Prediction-market and trading surfaces are decision-support tools, not financial advice; live trading stays paper-first and triple-gated. Design grounded in the real OracleQuant token system (phosphor-terminal on black, JetBrains Mono numerals) and the existing workspace-contracts migration plan.</p>
+</div></footer>
+
+<script>
+const SHIRTS = [
+  { id:"markets", name:"OracleQuant Markets", tag:"flagship", accent:"#39ff88", path:"/markets", tiles:0,
+    desc:"AI prediction-market intelligence for Kalshi — ensemble scoring, arbitrage scanner, comeback analysis, Kelly-sized ideas, crypto signals, daily briefings.",
+    rail:["Scanner","Arbitrage","Picks","Comeback","Backtest"],
+    kpis:[["Edges live","14"],["Brain acc","72%"],["Arb hits","3"],["Briefing","06:00"]],
+    predQ:"Fed cuts rates at the March meeting?", predMeta:"Brain 63% · market 54% · <b>+9% edge</b> · ¼-Kelly 2.1%", prob:63,
+    repos:["oraclequant"] },
+  { id:"autopilot", name:"OracleQuant Autopilot", tag:"execution · paper", accent:"#ffb454", path:"/autopilot", tiles:1,
+    desc:"Venue-agnostic trading engine — bracket trades mapped to binary-bet math, quarter-Kelly, drawdown guard. Runs headless; the shirt is its control panel. Every fill is Brain food.",
+    rail:["Signals","Positions","Equity","Risk","Ledger"],
+    kpis:[["Mode","PAPER"],["Open pos","2"],["Day P&L","+1.4%"],["Max DD","5.9%"]],
+    predQ:"BTC/USDT — momentum bracket, 2R target", predMeta:"win_prob 0.58 · fees in · <b>gated live</b> · paper fill logged", prob:58,
+    repos:["crypto-trading-bot","kalshi-trading-bot"] },
+  { id:"commerce", name:"OracleQuant Commerce", tag:"revenue", accent:"#8b78ff", path:"/commerce", tiles:2,
+    desc:"AI commerce atelier — dropshipping research, custom-imprint studio, fulfillment automation, subscription billing. Its billing layer is promoted up into the body as shared payments.",
+    rail:["Research","Studio","Catalog","Orders","Billing"],
+    kpis:[["Demand idx","81"],["Live SKUs","46"],["Orders","128"],["MRR","$2.4k"]],
+    predQ:"Will this SKU clear 50 units in 14 days?", predMeta:"Brain 71% demand · margin 38% · <b>launch</b>", prob:71,
+    repos:["prism"] },
+  { id:"life", name:"OracleQuant Life", tag:"top of funnel", accent:"#ff8fb4", path:"/life", tiles:3,
+    desc:"Personal guidance predictions — career, education, timing, daily outlook. Folds three guidance apps into one surface; prompts become Brain question types, the birth-profile becomes Brain context.",
+    rail:["Career","Education","Timing","Daily","Chart"],
+    kpis:[["Guidance","career"],["Confidence","68%"],["Streak","12d"],["Free tier","∞"]],
+    predQ:"Best window to switch roles this quarter?", predMeta:"Brain reads chart + market timing · <b>advisor-class</b>", prob:68,
+    repos:["celestial-guidance","inkwell-prophet","cosmic-passport","auraguide"] },
+  { id:"pocket", name:"OracleQuant Pocket", tag:"mobile reach", accent:"#35d0ff", path:"/pocket", tiles:4,
+    desc:"The Brain on top of any app — a floating Android overlay for brokers, sportsbooks, shopping, streaming. Three layers of one system: landing, proxy, device client.",
+    rail:["Overlay","Contexts","Proxy","Devices","Sync"],
+    kpis:[["Overlay","ON"],["Contexts","5"],["Latency","120ms"],["Device","linked"]],
+    predQ:"Live overlay: cash out this position?", predMeta:"in-game win-prob 0.44 · <b>side-market edge</b> shown on glass", prob:44,
+    repos:["overlayflow","overlayflow-aiproxy","overlayflow-android"] },
+  { id:"forge", name:"OracleQuant Forge", tag:"workbench · pro", accent:"#ff7a3c", path:"/forge", tiles:5,
+    desc:"The control plane where you inspect, train and steer your Brain — telemetry viewer, contract validator, agent-event stream. The tooling that grows the Brain becomes the pro tier.",
+    rail:["Brain","Memories","Telemetry","Contracts","Agents"],
+    kpis:[["Memories","12,482"],["Models","5"],["Brier↓","0.19"],["Health","OK"]],
+    predQ:"Which model is over-confident this week?", predMeta:"ensemble health · per-model accuracy · <b>forget / keep</b>", prob:80,
+    repos:["emberscot","deck","ai-workspace"] },
+];
+
+const C=97.4; // 2πr for r=15.5
+const tabs=document.querySelector(".switch-tabs");
+const grid=document.getElementById("shirtGrid");
+
+SHIRTS.forEach((s,i)=>{
+  const b=document.createElement("button");
+  b.className="shirt-tab"; b.setAttribute("role","tab");
+  b.setAttribute("aria-selected", i===0?"true":"false");
+  b.style.setProperty("--tabc", s.accent);
+  b.innerHTML=`<span class="dot"></span>${s.name.replace("OracleQuant ","")}`;
+  b.onclick=()=>select(i);
+  tabs.appendChild(b);
+
+  // shirt cards grid
+  const roles=["flagship","execution","revenue","top-of-funnel","mobile","workbench"];
+  const c=document.createElement("div");
+  c.className="card shirt"; c.style.setProperty("--sc",s.accent);
+  c.innerHTML=`<span class="role">${s.tag}</span><div class="n">SHIRT 0${i+1}</div>
+    <h3>${s.name}</h3><p>${s.desc}</p>
+    <div class="folds">${s.repos.map(r=>`<code>${r}</code>`).join(" ")}</div>`;
+  grid.appendChild(c);
+});
+
+function select(i){
+  const s=SHIRTS[i];
+  document.documentElement.style.setProperty("--accent", s.accent);
+  document.querySelectorAll(".shirt-tab").forEach((t,j)=>t.setAttribute("aria-selected", j===i?"true":"false"));
+  document.getElementById("urlpath").textContent=s.path;
+  document.getElementById("shirtName").textContent=s.name;
+  document.getElementById("shirtTag").textContent=s.tag;
+  document.getElementById("shirtDesc").textContent=s.desc;
+  document.getElementById("raillbl").textContent=s.name.replace("OracleQuant ","");
+  document.getElementById("rail").innerHTML=s.rail.map((r,k)=>`<a href="#" class="${k===0?'active':''}" onclick="return false">▪ ${r}</a>`).join("");
+  document.getElementById("kpis").innerHTML=s.kpis.map((k,idx)=>`<div><div class="k">${k[0]}</div><div class="v${idx===1?' acc':''}">${k[1]}</div></div>`).join("");
+  document.getElementById("predQ").textContent=s.predQ;
+  document.getElementById("predMeta").innerHTML=s.predMeta;
+  document.getElementById("arcF").setAttribute("stroke-dashoffset", (C*(1-s.prob/100)).toFixed(1));
+  document.getElementById("arcT").textContent=s.prob+"%";
+  const tiles=document.getElementById("apptiles");
+  tiles.innerHTML=SHIRTS.map((_,k)=>`<span class="${k===i?'on':''}"></span>`).join("");
+  document.getElementById("reposIn").innerHTML=`<b>Folds in:</b> ${s.repos.map(r=>`<code>${r}</code>`).join("")}`;
+}
+select(0);
+</script>

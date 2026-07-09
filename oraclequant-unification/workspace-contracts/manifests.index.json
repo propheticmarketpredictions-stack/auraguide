@@ -1,0 +1,300 @@
+{
+  "schema_version": "1",
+  "repo_count": 42,
+  "repos": [
+    {
+      "repo_name": "aeris-biologics",
+      "pack": "BASE44",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "aeris-biologics/repo-manifest.json"
+    },
+    {
+      "repo_name": "ai-workspace",
+      "pack": "SPEC",
+      "status": "spec",
+      "pilot": false,
+      "path": "ai-workspace/repo-manifest.json"
+    },
+    {
+      "repo_name": "alpha-chronograph",
+      "pack": "SPEC",
+      "status": "spec",
+      "pilot": false,
+      "path": "alpha-chronograph/repo-manifest.json"
+    },
+    {
+      "repo_name": "arcanum-vault",
+      "pack": "BASE44",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "arcanum-vault/repo-manifest.json"
+    },
+    {
+      "repo_name": "auraguide",
+      "pack": "BASE44",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "auraguide/repo-manifest.json"
+    },
+    {
+      "repo_name": "bridgeconnect",
+      "pack": "BASE44",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "bridgeconnect/repo-manifest.json"
+    },
+    {
+      "repo_name": "celestial-guidance",
+      "pack": "BASE44",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "celestial-guidance/repo-manifest.json"
+    },
+    {
+      "repo_name": "claude-chats",
+      "pack": "SPEC",
+      "status": "archive-candidate",
+      "pilot": false,
+      "path": "claude-chats/repo-manifest.json"
+    },
+    {
+      "repo_name": "cloakphone",
+      "pack": "BASE44",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "cloakphone/repo-manifest.json"
+    },
+    {
+      "repo_name": "cognitoboost",
+      "pack": "BASE44",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "cognitoboost/repo-manifest.json"
+    },
+    {
+      "repo_name": "cosmic-passport",
+      "pack": "BASE44",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "cosmic-passport/repo-manifest.json"
+    },
+    {
+      "repo_name": "crypto-trading-bot",
+      "pack": "QUANT",
+      "status": "canonical-candidate",
+      "pilot": false,
+      "path": "crypto-trading-bot/repo-manifest.json"
+    },
+    {
+      "repo_name": "cryptomansion",
+      "pack": "BASE44",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "cryptomansion/repo-manifest.json"
+    },
+    {
+      "repo_name": "deck",
+      "pack": "SPEC",
+      "status": "spec",
+      "pilot": false,
+      "path": "deck/repo-manifest.json"
+    },
+    {
+      "repo_name": "ebay-integration",
+      "pack": "INFRA",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "ebay-integration/repo-manifest.json"
+    },
+    {
+      "repo_name": "emberscot",
+      "pack": "EMBERSCOT",
+      "status": "pilot",
+      "pilot": true,
+      "path": "emberscot/repo-manifest.json"
+    },
+    {
+      "repo_name": "escrowvault",
+      "pack": "BASE44",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "escrowvault/repo-manifest.json"
+    },
+    {
+      "repo_name": "extremehappy",
+      "pack": "BASE44",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "extremehappy/repo-manifest.json"
+    },
+    {
+      "repo_name": "folio",
+      "pack": "BASE44",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "folio/repo-manifest.json"
+    },
+    {
+      "repo_name": "inkwell-prophet",
+      "pack": "BASE44",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "inkwell-prophet/repo-manifest.json"
+    },
+    {
+      "repo_name": "kalshi-trading-bot",
+      "pack": "SPEC",
+      "status": "spec",
+      "pilot": false,
+      "path": "kalshi-trading-bot/repo-manifest.json"
+    },
+    {
+      "repo_name": "kernelhub",
+      "pack": "BASE44",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "kernelhub/repo-manifest.json"
+    },
+    {
+      "repo_name": "My-apps-coming-to-web3-if-you-knew-about-them",
+      "pack": "SPEC",
+      "status": "spec",
+      "pilot": false,
+      "path": "My-apps-coming-to-web3-if-you-knew-about-them/repo-manifest.json"
+    },
+    {
+      "repo_name": "nebulachat",
+      "pack": "BASE44",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "nebulachat/repo-manifest.json"
+    },
+    {
+      "repo_name": "novaname",
+      "pack": "BASE44",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "novaname/repo-manifest.json"
+    },
+    {
+      "repo_name": "novavault",
+      "pack": "BASE44",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "novavault/repo-manifest.json"
+    },
+    {
+      "repo_name": "oracle-app-ICJAVELIN",
+      "pack": "SPEC",
+      "status": "spec",
+      "pilot": false,
+      "path": "oracle-app-ICJAVELIN/repo-manifest.json"
+    },
+    {
+      "repo_name": "oraclequant",
+      "pack": "ORACLE",
+      "status": "pilot",
+      "pilot": true,
+      "path": "oraclequant/repo-manifest.json"
+    },
+    {
+      "repo_name": "oraclequant-copy",
+      "pack": "ORACLE",
+      "status": "duplicate-candidate",
+      "pilot": false,
+      "path": "oraclequant-copy/repo-manifest.json"
+    },
+    {
+      "repo_name": "overlayflow",
+      "pack": "BASE44",
+      "status": "pilot",
+      "pilot": true,
+      "path": "overlayflow/repo-manifest.json"
+    },
+    {
+      "repo_name": "overlayflow-aiproxy",
+      "pack": "INFRA",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "overlayflow-aiproxy/repo-manifest.json"
+    },
+    {
+      "repo_name": "overlayflow-android",
+      "pack": "ANDROID",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "overlayflow-android/repo-manifest.json"
+    },
+    {
+      "repo_name": "prism",
+      "pack": "PRISM",
+      "status": "pilot",
+      "pilot": true,
+      "path": "prism/repo-manifest.json"
+    },
+    {
+      "repo_name": "repo-editor-livetest",
+      "pack": "SPEC",
+      "status": "archive-candidate",
+      "pilot": false,
+      "path": "repo-editor-livetest/repo-manifest.json"
+    },
+    {
+      "repo_name": "seth-copy",
+      "pack": "BASE44",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "seth-copy/repo-manifest.json"
+    },
+    {
+      "repo_name": "seth-copy2",
+      "pack": "BASE44",
+      "status": "duplicate-candidate",
+      "pilot": false,
+      "path": "seth-copy2/repo-manifest.json"
+    },
+    {
+      "repo_name": "syncpulse",
+      "pack": "BASE44",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "syncpulse/repo-manifest.json"
+    },
+    {
+      "repo_name": "urban-alchemist",
+      "pack": "BASE44",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "urban-alchemist/repo-manifest.json"
+    },
+    {
+      "repo_name": "vaultlaunch",
+      "pack": "BASE44",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "vaultlaunch/repo-manifest.json"
+    },
+    {
+      "repo_name": "vaultpaper",
+      "pack": "BASE44",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "vaultpaper/repo-manifest.json"
+    },
+    {
+      "repo_name": "velvet",
+      "pack": "BASE44",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "velvet/repo-manifest.json"
+    },
+    {
+      "repo_name": "zeroday-walls",
+      "pack": "BASE44",
+      "status": "merge-candidate",
+      "pilot": false,
+      "path": "zeroday-walls/repo-manifest.json"
+    }
+  ]
+}

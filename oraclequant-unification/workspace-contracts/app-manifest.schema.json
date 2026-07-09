@@ -1,0 +1,37 @@
+{
+  "title": "Workspace App Manifest",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "repo_name",
+    "purpose",
+    "runtime",
+    "primary_language",
+    "portfolio_pack",
+    "status",
+    "local_first_raw_data",
+    "pilot_integration"
+  ],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "repo_name": { "type": "string" },
+    "purpose": { "type": "string" },
+    "runtime": { "type": "string" },
+    "primary_language": { "type": "string" },
+    "portfolio_pack": { "type": "string" },
+    "status": { "type": "string" },
+    "local_first_raw_data": { "type": "boolean" },
+    "pilot_integration": { "type": "boolean" },
+    "role": { "type": "string" },
+    "canonical_for": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "supersedes": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "merge_target": { "type": "string" },
+    "notes": { "type": "string" }
+  }
+}
